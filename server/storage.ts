@@ -147,7 +147,11 @@ export class MemStorage implements IStorage {
 
   async createCourse(course: InsertCourse): Promise<Course> {
     const id = this.courseIdCounter++;
-    const newCourse: Course = { ...course, id };
+    const newCourse: Course = { 
+      ...course, 
+      id,
+      rating: course.rating ?? null
+    };
     this.courses.set(id, newCourse);
     return newCourse;
   }
@@ -165,7 +169,12 @@ export class MemStorage implements IStorage {
 
   async createLesson(lesson: InsertLesson): Promise<Lesson> {
     const id = this.lessonIdCounter++;
-    const newLesson: Lesson = { ...lesson, id };
+    const newLesson: Lesson = { 
+      ...lesson, 
+      id,
+      codeTemplate: lesson.codeTemplate ?? null,
+      solution: lesson.solution ?? null
+    };
     this.lessons.set(id, newLesson);
     return newLesson;
   }
