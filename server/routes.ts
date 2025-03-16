@@ -20,6 +20,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch learning paths" });
     }
   });
+  
+  // Get specific learning path
+  app.get("/api/learning-paths/:id", async (req, res) => {
+    try {
+      const pathId = parseInt(req.params.id);
+      const path = await storage.getLearningPath(pathId);
+      
+      if (!path) {
+        return res.status(404).json({ message: "Learning path not found" });
+      }
+      
+      res.json(path);
+    } catch (error) {
+      console.error("Error fetching learning path:", error);
+      res.status(500).json({ message: "Failed to fetch learning path" });
+    }
+  });
+  
+  // Get courses for a specific learning path
+  app.get("/api/learning-paths/:id/courses", async (req, res) => {
+    try {
+      const pathId = parseInt(req.params.id);
+      const pathCourses = await storage.getPathCourses(pathId);
+      
+      if (!pathCourses || pathCourses.length === 0) {
+        return res.json([]);
+      }
+      
+      res.json(pathCourses);
+    } catch (error) {
+      console.error("Error fetching path courses:", error);
+      res.status(500).json({ message: "Failed to fetch path courses" });
+    }
+  });
 
   // Get user path progress
   app.get("/api/user/path-progress", async (req, res) => {
