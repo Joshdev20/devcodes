@@ -41,54 +41,217 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [location, navigate] = useLocation();
   const { user, loginMutation, registerMutation } = useAuth();
-  
-  // Create login form - only initialize when isLogin is true
-  const loginForm = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      username: "",
-      password: "",
-    },
-    mode: "onChange",
-  });
-  
-  // Create register form - only initialize when isLogin is false
-  const registerForm = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      username: "",
-      displayName: "",
-      password: "",
-      confirmPassword: "",
-    },
-    mode: "onChange",
-  });
-  
-  // Reset the forms when switching between login and register
-  useEffect(() => {
-    if (isLogin) {
-      loginForm.reset();
-    } else {
-      registerForm.reset();
-    }
-  }, [isLogin]);
-  
+
   // Check if user is already authenticated
   useEffect(() => {
     if (user) {
       navigate("/");
     }
   }, [user, navigate]);
+
+  // LoginForm component - encapsulated with its own form state
+  const LoginForm = () => {
+    const form = useForm<LoginFormValues>({
+      resolver: zodResolver(loginSchema),
+      defaultValues: {
+        username: "",
+        password: "",
+      },
+      mode: "onChange",
+    });
+    
+    const onSubmit = (data: LoginFormValues) => {
+      loginMutation.mutate(data);
+    };
+    
+    return (
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Username</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Enter your username"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="password" 
+                    placeholder="••••••••"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={loginMutation.isPending}
+          >
+            {loginMutation.isPending ? (
+              <>
+                <i className="ri-loader-2-line animate-spin mr-2"></i>
+                Signing in...
+              </>
+            ) : (
+              "Sign in"
+            )}
+          </Button>
+          
+          <div className="text-center mt-4">
+            <Button
+              variant="link"
+              className="text-primary"
+              type="button"
+              onClick={() => setIsLogin(false)}
+            >
+              Don't have an account? Sign up
+            </Button>
+          </div>
+        </form>
+      </Form>
+    );
+  };
   
-  // Handle form submissions
-  function onLoginSubmit(data: LoginFormValues) {
-    loginMutation.mutate(data);
-  }
-  
-  function onRegisterSubmit(data: RegisterFormValues) {
-    const { confirmPassword, ...submitData } = data;
-    registerMutation.mutate(submitData);
-  }
+  // RegisterForm component - encapsulated with its own form state
+  const RegisterForm = () => {
+    const form = useForm<RegisterFormValues>({
+      resolver: zodResolver(registerSchema),
+      defaultValues: {
+        username: "",
+        displayName: "",
+        password: "",
+        confirmPassword: "",
+      },
+      mode: "onChange",
+    });
+    
+    const onSubmit = (data: RegisterFormValues) => {
+      const { confirmPassword, ...submitData } = data;
+      registerMutation.mutate(submitData);
+    };
+    
+    return (
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="displayName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Display Name</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Enter your name" 
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Username</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Choose a username"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="password" 
+                    placeholder="Create a password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirm Password</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="password" 
+                    placeholder="Confirm your password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={registerMutation.isPending}
+          >
+            {registerMutation.isPending ? (
+              <>
+                <i className="ri-loader-2-line animate-spin mr-2"></i>
+                Creating account...
+              </>
+            ) : (
+              "Create Account"
+            )}
+          </Button>
+          
+          <div className="text-center mt-4">
+            <Button
+              variant="link"
+              className="text-primary"
+              type="button"
+              onClick={() => setIsLogin(true)}
+            >
+              Already have an account? Sign in
+            </Button>
+          </div>
+        </form>
+      </Form>
+    );
+  };
   
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col md:flex-row">
@@ -112,198 +275,7 @@ export default function AuthPage() {
           </CardHeader>
           
           <CardContent>
-            {isLogin ? (
-              // Login Form
-              <Form {...loginForm}>
-                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-                  <FormField
-                    control={loginForm.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Username</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Enter your username"
-                            value={field.value}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={loginForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="password" 
-                            placeholder="••••••••"
-                            value={field.value}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={loginMutation.isPending}
-                  >
-                    {loginMutation.isPending ? (
-                      <>
-                        <i className="ri-loader-2-line animate-spin mr-2"></i>
-                        Signing in...
-                      </>
-                    ) : (
-                      "Sign in"
-                    )}
-                  </Button>
-                  
-                  <div className="text-center mt-4">
-                    <Button
-                      variant="link"
-                      className="text-primary"
-                      type="button"
-                      onClick={() => setIsLogin(false)}
-                    >
-                      Don't have an account? Sign up
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            ) : (
-              // Registration Form
-              <Form {...registerForm}>
-                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-                  <FormField
-                    control={registerForm.control}
-                    name="displayName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Display Name</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Enter your name" 
-                            value={field.value}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={registerForm.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Username</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Choose a username"
-                            value={field.value}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={registerForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="password" 
-                            placeholder="Create a password"
-                            value={field.value}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={registerForm.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="password" 
-                            placeholder="Confirm your password"
-                            value={field.value}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={registerMutation.isPending}
-                  >
-                    {registerMutation.isPending ? (
-                      <>
-                        <i className="ri-loader-2-line animate-spin mr-2"></i>
-                        Creating account...
-                      </>
-                    ) : (
-                      "Create Account"
-                    )}
-                  </Button>
-                  
-                  <div className="text-center mt-4">
-                    <Button
-                      variant="link"
-                      className="text-primary"
-                      type="button"
-                      onClick={() => setIsLogin(true)}
-                    >
-                      Already have an account? Sign in
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            )}
+            {isLogin ? <LoginForm /> : <RegisterForm />}
           </CardContent>
         </Card>
       </div>
