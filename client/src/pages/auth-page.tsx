@@ -42,15 +42,17 @@ export default function AuthPage() {
   const [location, navigate] = useLocation();
   const { user, loginMutation, registerMutation } = useAuth();
   
-  // Create forms
+  // Create login form - only initialize when isLogin is true
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       username: "",
       password: "",
     },
+    mode: "onChange",
   });
   
+  // Create register form - only initialize when isLogin is false
   const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -59,7 +61,17 @@ export default function AuthPage() {
       password: "",
       confirmPassword: "",
     },
+    mode: "onChange",
   });
+  
+  // Reset the forms when switching between login and register
+  useEffect(() => {
+    if (isLogin) {
+      loginForm.reset();
+    } else {
+      registerForm.reset();
+    }
+  }, [isLogin]);
   
   // Check if user is already authenticated
   useEffect(() => {
