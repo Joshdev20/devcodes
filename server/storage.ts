@@ -224,7 +224,10 @@ export class MemStorage implements IStorage {
     const newProgress: UserCourseProgress = { 
       ...progress, 
       id,
-      lastAccessed: progress.lastAccessed || new Date()
+      lastAccessed: progress.lastAccessed || new Date(),
+      completedLessons: progress.completedLessons ?? 0,
+      isStarted: progress.isStarted ?? false,
+      isCompleted: progress.isCompleted ?? false
     };
     this.userCourseProgresses.set(`${progress.userId}-${progress.courseId}`, newProgress);
     return newProgress;
@@ -255,7 +258,13 @@ export class MemStorage implements IStorage {
 
   async createUserPathProgress(progress: InsertUserPathProgress): Promise<UserPathProgress> {
     const id = this.userPathProgressIdCounter++;
-    const newProgress: UserPathProgress = { ...progress, id };
+    const newProgress: UserPathProgress = { 
+      ...progress, 
+      id,
+      progress: progress.progress ?? 0,
+      isActive: progress.isActive ?? false,
+      isCompleted: progress.isCompleted ?? false 
+    };
     this.userPathProgresses.set(`${progress.userId}-${progress.pathId}`, newProgress);
     return newProgress;
   }
@@ -287,7 +296,8 @@ export class MemStorage implements IStorage {
     const id = this.userLessonProgressIdCounter++;
     const newProgress: UserLessonProgress = { 
       ...progress, 
-      id, 
+      id,
+      completed: progress.completed ?? false,
       completedAt: progress.completed ? new Date() : null 
     };
     this.userLessonProgresses.set(`${progress.userId}-${progress.lessonId}`, newProgress);

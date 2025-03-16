@@ -245,7 +245,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const updatedProgress = await storage.updateUserLessonProgress(
           userId, 
           data.lessonId, 
-          data.completed
+          data.completed ?? false
         );
         return res.json(updatedProgress);
       }
