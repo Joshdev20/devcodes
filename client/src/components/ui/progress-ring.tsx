@@ -19,7 +19,9 @@ export function ProgressRing({
 }: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
-  const offset = circumference - (progress / 100) * circumference;
+  // Ensure progress is a valid number between 0 and 100
+  const validProgress = isNaN(progress) ? 0 : Math.max(0, Math.min(100, progress));
+  const offset = circumference - (validProgress / 100) * circumference;
   
   return (
     <div className={cn("relative inline-flex items-center justify-center", className)}>
@@ -50,7 +52,7 @@ export function ProgressRing({
       </svg>
       {showPercentage && (
         <div className="absolute inset-0 flex items-center justify-center text-sm font-medium text-white">
-          {Math.round(progress)}%
+          {Math.round(validProgress)}%
         </div>
       )}
     </div>
